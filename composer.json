@@ -1,0 +1,7 @@
+{
+    "require": {
+        "forensic/feed-parser": "^1.2",
+        "phpxmlrpc/polyfill-xmlrpc": "^1.0",
+        "hieu-le/wordpress-xmlrpc-client": "^2.6"
+    }
+}
