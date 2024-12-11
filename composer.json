@@ -2,6 +2,8 @@
     "require": {
         "forensic/feed-parser": "^1.2",
         "phpxmlrpc/polyfill-xmlrpc": "^1.0",
-        "hieu-le/wordpress-xmlrpc-client": "^2.6"
+        "hieu-le/wordpress-xmlrpc-client": "^2.6",
+        "voku/simple_html_dom": "^4.8",
+        "fivefilters/readability.php": "^3.1"
     }
 }

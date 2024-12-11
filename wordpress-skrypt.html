@@ -1,0 +1,50 @@
+<html>
+<head>
+    <script src="wordpress-skrypt-strona.js"></script> 
+    <style>
+        body {
+            background-color: darkgrey;
+        }
+        h1 {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+        }
+        .nowrap {
+            white-space: nowrap; 
+            display: inline
+        }
+        button {
+            margin-left: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>
+        wordpress-skrypt
+    </h1>
+    <form action="wordpress-skrypt.php" method="POST">
+        Temat:* <input type="text" name="temat"><br>
+        Słowa kluczowe: <input type="text" name="slowaklucz"><br>
+        <input type="submit">
+    </form>
+    <h2>
+        Lista słów kluczowych
+        <br>
+        <input type="text" id="slowolista">
+    </h2>
+    <ul>
+        <li><strong>Suplementy</strong>
+            <input type='button' onclick="addwordsuple();" value='Dodaj' />
+            <ul id="suple" onclick="removesuple(event)">
+            </ul>
+        </li>
+        <li><strong>Odżywki</strong>
+            <input type='button' onclick="addwordodzywki();" value='Dodaj' />
+            <ul id="odzywki" onclick="removeodzywki(event)">
+            <ul>
+            </ul>
+        </li>
+    </ul>
+</body>
+</html>
