@@ -24,14 +24,18 @@
         wordpress-skrypt
     </h1>
     <form action="wordpress-skrypt.php" method="POST">
-        Temat:* <input type="text" name="temat"><br>
-        Słowa kluczowe: <input type="text" name="slowaklucz"><br>
+        Temat:* <input type="text" name="temat" placeholder="suple na odchudzanie" required><br>
+        Słowa kluczowe: <input type="text" id="slowaklucz" placeholder="tanie suple, wyprzedaż suplementów" name="slowaklucz"><br>
         <input type="submit">
     </form>
     <h2>
         Lista słów kluczowych
         <br>
-        <input type="text" id="slowolista">
+        <label for="slowolista">Słowo kluczowe*:</label>
+        <input type="text" placeholder="tanie suple" name="slowolista" id="slowolista" required>
+        <br>
+        <label for="link">Link:</label>
+        <input type="url" placeholder="https://example.com" pattern="https://.*" name="link" id="link">
     </h2>
     <ul>
         <li><strong>Suplementy</strong>

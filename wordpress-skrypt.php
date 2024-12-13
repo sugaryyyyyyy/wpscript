@@ -23,7 +23,33 @@ $RSSfeed = $config["rssfeed"]; // RSS Feed
 
 // input z htmla z zabezpieczeniem przed XSS (slabym ale lepszy od niczego)
 $prompt = strip_tags($_POST['temat']);
-$slowaklucz = strip_tags($_POST['slowaklucz']);
+$slowaklucze = strip_tags($_POST['slowaklucz']);
+$slowaklucze = explode('; ', $slowaklucze);
+$aslowaklucz = [];
+$c = 0;
+foreach ($slowaklucze as $slowaklucz) {
+    $slowoklucz = explode(', ', $slowaklucz);
+        if ($slowoklucz[0] == NULL || $slowoklucz[1] == NULL) { // sprawdza czy nie ma pustych stringów
+            break;
+        }
+
+        if ($slowoklucz[1] == "undefined") { // sprawdza czy tekst ma link
+            $array = [
+                "słowo" => $slowoklucz[0],
+            ]; 
+        }
+
+        else {
+            $array = [
+                "słowo" => $slowoklucz[0],
+                "link" => $slowoklucz[1]
+            ];
+        } 
+        $aslowaklucz += [ $c => $array ]; 
+        $c++;
+}
+$slowoklucz = json_encode($aslowaklucz, JSON_UNESCAPED_UNICODE);
+
 function print_withpad($message) {
     // Funkcja print z padowaniem i line breakiem, aby przeglądarka nie używała cachu.
     // przyjmuje tekst w stringu
@@ -202,7 +228,11 @@ function upload_wordpress_media($image, $name) {
     // uploaduje plik do serweru wordpress
     // przyjmuje dane zdjęcia w jpegu i nazwa pliku w stringu
     // zwraca int attachment ID
+    $wpLog = new Monolog\Logger('wp-xmlrpc');
     $wpClient = new WordpressClient();
+    $wpClient->onError(function($error, $event) use ($wpLog){
+        $wpLog->addError($error, $event);
+    });
     $wpClient->setCredentials($GLOBALS['WPxmlrpc'], $GLOBALS['WPuser'], $GLOBALS['WPpass']);
     $uploadMedia = $wpClient->uploadFile("$name.jpg", "image/jpeg", $image, false);
     $attachment_id = $uploadMedia['attachment_id'];
@@ -213,7 +243,11 @@ function get_wordpress_media_url($attachment_id) {
     // bierze link do pliku z attachment ID z serwera wordpress
     // przyjmuje attachment ID
     // zwraca link w stringu
+    $wpLog = new Monolog\Logger('wp-xmlrpc');
     $wpClient = new WordpressClient();
+    $wpClient->onError(function($error, $event) use ($wpLog){
+        $wpLog->addError($error, $event);
+    });
     $wpClient->setCredentials($GLOBALS['WPxmlrpc'], $GLOBALS['WPuser'], $GLOBALS['WPpass']);
     return $wpClient->getMediaItem($attachment_id)['link'];
 }
@@ -222,7 +256,11 @@ function create_wordpress_post($title, $content, $tags, $thumbnail_aID) {
     // tworzy post na serwerze wordpress
     // przyjmuje tytuł w stringu, zawartość postu, tagi, i attachment ID zdjęcia do postu w int
     // zwraca ID postu w int  
+    $wpLog = new Monolog\Logger('wp-xmlrpc');
     $wpClient = new WordpressClient();
+    $wpClient->onError(function($error, $event) use ($wpLog){
+        $wpLog->addError($error, $event);
+    });
     $wpClient->setCredentials($GLOBALS['WPxmlrpc'], $GLOBALS['WPuser'], $GLOBALS['WPpass']);
     $parameters = [
         'post_type' => 'post',
@@ -259,6 +297,7 @@ function main($prompt, $slowaklucz = NULL) {
     // przyjmuje stringa tematu
     // nic nie zwraca
     $GMPrompt = $GLOBALS['GMPrompt'];
+    $WPlink = $GLOBALS['WPlink'];
     $WPlink = $GLOBALS['WPlink'];
     /* Usun komentarz aby uzyc feedu RSS
     $RSSfeed = $GLOBALS['RSSfeed'];
@@ -305,12 +344,11 @@ function main($prompt, $slowaklucz = NULL) {
         }
     }
     print_withpad("Generowanie tekstu..\n");
-
-    $GMPrompt .= "Dodaj nazwy zdjęć pasujące do paragrafu, wstaw taga zdjęcia HTML prowadzącego do '{placeholder}' w jego miejsce. $site_data . Pamiętaj aby wstawić tagi HTML prowadzącego do '{placeholder}' do paragrafów.";
     if ($slowaklucz) {
         print_withpad("Słowa kluczowe: $slowaklucz\n");
-        $GMPrompt .= " Słowa kluczowe do zawartości postu: $slowaklucz. Dodaj je do tagów i do tekstu w sposób naturalny."; 
+        $GMPrompt .= " Słowa kluczowe które powinny się znaleźć w poście w formacie JSON: $slowaklucz. Dodaj je do tagów i do tekstu w sposób naturalny."; 
     }
+    $GMPrompt .= "Dodaj nazwy zdjęć pasujące do paragrafu, oddzielajać je ', '. Wstaw taga zdjęcia HTML prowadzącego do '{placeholder}' w jego miejsce. $site_data . Pamiętaj aby wstawić tagi HTML prowadzącego do '{placeholder}' do paragrafów.";
     $geminijson = generate_text($GMPrompt);
     $geminicontent = $geminijson->content;
     $geminititle = $geminijson->post_title;
@@ -360,8 +398,8 @@ function main($prompt, $slowaklucz = NULL) {
     print_withpad("Gotowe! Stworzono posta o nazwie \"$geminititle\", $WPlink/wp-admin/post.php?post=$post_id&action=edit");
 } 
 if ($prompt) {
-    if ($slowaklucz) {
-        main($prompt, $slowaklucz);
+    if ($slowoklucz) {
+        main($prompt, $slowoklucz);
     }
     else {
         main($prompt);
